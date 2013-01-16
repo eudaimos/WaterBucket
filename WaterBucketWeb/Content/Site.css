@@ -1,0 +1,161 @@
+﻿body {
+    font-size: .85em;
+    font-family: Verdana, Helvetica, Sans-Serif;
+    color: #232323;
+    background-color: #fff;
+    width: 1080px;
+}
+
+header, footer, nav, section {
+    display: block;
+}
+
+
+/* Styles for basic forms
+-----------------------------------------------------------*/
+fieldset {
+    border: 1px solid #ddd;
+    padding: 0 1.4em 1.4em 1.4em;
+    margin: 0 0 1.5em 0;
+}
+
+legend {
+    font-size: 1.2em;
+    font-weight: bold;
+}
+
+textarea {
+    min-height: 75px;
+}
+
+.editor-label {
+    margin: 1em 0 0 0;
+}
+
+.editor-field {
+    margin: 0.5em 0 0 0;
+}
+
+
+/* Styles for validation helpers
+-----------------------------------------------------------*/
+.field-validation-error {
+    color: #f00;
+}
+
+.field-validation-valid {
+    display: none;
+}
+
+.input-validation-error {
+    border: 1px solid #f00;
+    background-color: #fee;
+}
+
+.validation-summary-errors {
+    font-weight: bold;
+    color: #f00;
+}
+
+.validation-summary-valid {
+    display: none;
+}
+
+table th, table td {
+    padding: 2px 4px;
+}
+
+.left, .center, .right {
+    display: inline-block;
+}
+
+.outer {
+    vertical-align: top;
+    padding: 5px;
+    font-size: 13px;
+}
+
+.left.outer {
+    position: relative;
+    width: 320px;
+}
+
+.right.outer {
+    position: relative;
+    width: 300px;
+}
+
+.center.outer {
+    padding: 10px;
+}
+
+.stepno {
+    color: white;
+    background-color: gray;
+    text-align: right;
+}
+
+td.state {
+    text-align: center;
+}
+
+.solution table td {
+    text-align: center;
+}
+
+.winner {
+    color: white;
+    background-color: green;
+}
+
+.loser {
+    color: white;
+    background-color: red;
+}
+
+.tie {
+    font-weight: bold;
+    background-color: yellow;
+}
+
+a {
+    color: #1D87CF;
+    text-decoration: none;
+}
+
+a:hover {
+    color: #1D87CF;
+    background-color: #D3DEE6;
+}
+
+.jslink {
+    font-size: 12px;
+    font-weight: bold;
+    cursor: pointer;
+    color: #1FBFC2;
+    text-decoration: none;
+}
+
+.jslink:hover {
+    color: #1A9EA1;
+    background-color: #E9F5F5;
+}
+
+.labelset label {
+    height: 12px;
+}
+
+.inputset input {
+    height: 12px;
+}
+
+input[type="number"] {
+    width: 100px;
+    padding: 1px 5px 1px 1px;
+    text-align: right;
+}
+
+table.actions {
+    font-family: 'Courier New';
+    font-size: 12px;
+}

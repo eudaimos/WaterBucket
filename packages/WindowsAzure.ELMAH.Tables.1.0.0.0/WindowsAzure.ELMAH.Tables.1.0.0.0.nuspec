@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
+  <metadata>
+    <id>WindowsAzure.ELMAH.Tables</id>
+    <version>1.0.0.0</version>
+    <title>ELMAH with Windows Azure Table Storage</title>
+    <authors>WadeWegner</authors>
+    <owners>WadeWegner</owners>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>This is a simple package that sets up ELMAH to use Windows Azure table storage for the ELMAH logs.</description>
+    <summary>This is a simple package that sets up ELMAH to use Windows Azure table storage for the ELMAH logs.</summary>
+    <dependencies>
+      <dependency id="elmah" version="1.2.0.1" />
+    </dependencies>
+    <frameworkAssemblies>
+      <frameworkAssembly assemblyName="System.Data.Services.Client" targetFramework=".NETFramework4.0" />
+    </frameworkAssemblies>
+  </metadata>
+</package>

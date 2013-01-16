@@ -1,0 +1,251 @@
+﻿@{
+    ViewBag.Title = "The Water Bucket Calculator";
+}
+
+<article>
+<h1 style="margin: 0 320px 20px; padding-left: 10px;">The Water Bucket Calculator</h1>
+<section id="Background" class="left outer">
+    <p>
+        This is a project I made to test out using <a target="_blank" href="http://msdn.microsoft.com/en-us/data/gg577609.aspx">Reactive Extensions (Rx)</a>, 
+        <a target="_blank" href="http://msdn.microsoft.com/en-us/library/vstudio/hh191443.aspx">.NET 4.5 async/await</a>, <a target="_blank" href="http://signalr.net/">SignalR</a>, 
+        and <a target="_blank" href="http://zguide.zeromq.org/page:all">ZeroMQ (ØMQ)</a> in a Microsoft Azure PaaS hosting environment using Web and Worker Roles.
+    </p>
+    <p>
+        The Water Bucket Calculator is based on the following logic problem:
+    </p>
+    <blockquote style="font-family: Consolas,monospace">
+        You have two (2) buckets of known volume but unknown dimensions and an unlimited water source.<br />
+        You must somehow deliver an exact measure of water using just the buckets provided.
+    </blockquote>
+    <p>
+        The calculator allows you to calculate how many steps, how much water is required to pull from the water source, and how much 
+        water is emptied out in order to reach the goal water volume.
+        Because of the volume vs. dimensions constraints, there are only 3 operations that can be performed on the buckets:
+    </p>
+        <ul>
+            <li>Fill a bucket up to its capacity - either from an empty state or from having some volume of water already in it</li>
+            <li>Empty a bucket - this empties it completely to zero (0)</li>
+            <li>Transfer water from one bucket to another - this will attempt to put as much water from the source bucket into the destination bucket until the 
+                destination bucket is full (as if Fill was performed on the destination bucket)</li>
+        </ul>
+    <p>
+        It is assumed that less is more, so the fewer the steps, water taken from the water source, and water emptied, the better.
+    </p>
+    <p>
+        How the work is performed by the calculator is also in your control.  This allows you to see the different effects of using different ways of performing the work and receiving 
+        the real-time messages of the work being done.
+    </p>
+    <p>Where the work is done:</p>
+    <ul>
+        <li>Doing work in the Web Role means that all of the work is being done in the WebRole or on the Web Server. Work updates are obtained by Subscribing to an Rx IObservable 
+            and sent back to the client browser through SignalR as they are received.
+        </li>
+        <li>Doing work in the Worker Role means that the work is being handed off to a back-end WorkerRole using an Azure Storage Queue. Updates from the Worker are published
+            over a ZeroMQ PUB Socket and the WebRole listens on a ZeroMQ SUB Socket subscribing to only messages for the specific problem it is trying to solve.  These updates
+            are then delivered to the browser client using SignalR the same way updates are when work is done in the Web Role.</li>
+    </ul>
+    <p>
+        You can manipulate the threads in the chain by telling them to yield after every action step.
+        You can also add a delay to start the work and because the work is simple and not compute or resource intensive, you can add artificial delay to the work being done for each action.
+    </p>
+    <p>
+        It's possible to combine ZeroMQ with Reactive Extensions by treating the ZeroMQ SUB Socket message stream as an event stream using a Rx Observable sequence over it.
+        To do this, select the '<span style="font-style: italic">Use Rx Observable for incoming ZMQ Messages</span>' option when using the Worker Role.
+    </p>
+    <p>
+        Based on the problem you solve and how you choose to solve it, you may get some odd behaviors.  These are expected and allow this application to display some of 
+        the behaviors of these technologies.  For instance, without delaying the start or work of the worker role, its easy to miss most or all of the updates since it'll be 
+        completed before the subscription is made to receive them.  Also since ZeroMQ can process messages a lot quicker than SignalR, it's easy to have missed messages. Additionally, 
+        it's possible to see duplicate messages if the problem takes longer than the 3 minute timeout for Queue messages, as another worker will pick up the message and 
+        begin working on it.  Queue messages are only deleted when a problem has been completed so that a crashed worker won't prevent a problem from being solved. Many
+        other behaviors are specifically not guarded against in order to understand how they work together.
+    </p>
+</section>
+
+<section id="Calculator" class="center outer" style="display:none;">
+<form>
+<fieldset data-bind="with: Work"><legend>How do you want the work to be performed</legend>
+    <div style="display: inline-block; padding: 5px; margin: 5px">
+        <input name="webrole" type="radio" value="web" data-bind="checked: InProcess" /><label for="webrole">Do work in Web Role</label><br />
+        <input name="yieldweb" type="checkbox" data-bind="checked: YieldWeb" /><label for="yieldweb">Yield Web Thread on each Action Step</label><br />
+        (Still applies when work done in Worker)
+    </div>
+    <div style="display: inline-block; padding: 5px; margin: 5px; vertical-align: top">
+        <input name="workerrole" type="radio" value="worker" data-bind="checked: InProcess" /><label for="workerrole">Do work in Worker Role</label><br />
+        <input name="yieldworker" type="checkbox" data-bind="checked: YieldWorker, visible: UseWorker" />
+        <label for="yieldworker" data-bind="visible: UseWorker">Yield Worker Thread on each Action Step</label><br />
+        <input name="observezmq" type="checkbox" data-bind="checked: ObserverOnZmq, visible: UseWorker" />
+        <label for="observezmq" data-bind="visible: UseWorker">Use Rx Observable for incoming ZMQ Messages</label>
+    </div>
+    <table border="0" style="padding: 5px 0; margin: 5px 0">
+        <tr><td><label for="DelayStart">Delay Start of Work:</label></td><td><input type="number" min="0" max="60000" name="DelayStart" data-bind="value: StartDelay" /> (in milliseconds)</td></tr>
+        <tr><td><label for="WorkDelay">Artificial Work Delay:</label></td><td><input type="number" min="0" max="5000" name="WorkDelay" data-bind="value: WorkDelay" /> (in milliseconds)</td></tr>
+    </table>
+</fieldset>
+<fieldset><legend>What is the problem you want to solve</legend>
+    <!-- ko with: Problem -->
+    <table border="0" style="padding: 5px 0; margin: 5px 0">
+        <tr><td><label for="FirstBucketCapacity">First Bucket Capacity:</label></td><td><input type="number" min="2" name="FirstBucketCapacity" data-bind="value: FirstBucketCapacity" /></td></tr>
+        <tr><td><label for="SecondBucketCapacity">Second Bucket Capacity:</label></td><td><input type="number" min="2" name="SecondBucketCapacity" data-bind="value: SecondBucketCapacity" /></td></tr>
+        <tr><td><label for="GoalWaterVolume">Goal Water Volume:</label></td><td><input type="number" min="2" name="GoalWaterVolume" data-bind="value: GoalWaterVolume" /></td></tr>
+    </table>
+    <!-- /ko -->
+    <input type="submit" value="Solve" data-bind="click: SubmitProblem, clickBubble: false" />
+</fieldset>
+</form>
+<section id="Messages">
+    <ul style="list-style:none" data-bind="foreach: Messages">
+        <li data-bind="text: $data"></li>
+    </ul>
+</section>
+<section id="Solutions" style="padding: 5px 0 100px 0">
+    <div id="NotSolvable" data-bind="visible: !IsSolvable()">
+        This Problem has No Solution
+    </div>
+    <div id="BigToSmall" class="left" data-bind="visible: IsSolvable() && IsStarted()">
+        <h3>Big to Small Strategy</h3>
+        <div class="solution" data-bind="visible: BigToSmallSolution">
+            <table data-bind="with: BigToSmallSolution">
+                <thead>
+                    <tr><th># Steps</th><th>Water Pulled</th><th>Water Emptied</th></tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td data-bind="text: NumberOfActions, css: calculator.Css.b2s.Actions"></td>
+                        <!-- ko with: EndingReservoireState -->
+                        <td data-bind="text: VolumeUsed, css: calculator.Css.b2s.Used"></td>
+                        <td data-bind="text: VolumeThrownOut, css: calculator.Css.b2s.ThrownOut"></td>
+                        <!-- /ko -->
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <table border="1" class="actions">
+            <thead>
+                <tr><th class="stepno">Step #</th><th>Bucket A</th><th>Bucket B</th><th>Action Taken</th></tr>
+            </thead>
+            <tbody class="bound" data-bind="foreach: BigToSmall, visible: UseBoundActions">
+                <tr><td class="stepno" data-bind="text: StepNumber"></td>
+                    <td class="state" data-bind="text: $parent.State('A', $data).CurrentFill"></td>
+                    <td class="state" data-bind="text: $parent.State('B', $data).CurrentFill"></td>
+                    <td data-bind="text: Description"></td></tr>
+            </tbody>
+            <tbody class="unbound" data-bind="visible: !UseBoundActions()">
+            </tbody>
+        </table>
+    </div>
+    <div id="SmallToBig" class="right" data-bind="visible: IsSolvable() && IsStarted()">
+        <h3>Small to Big Strategy</h3>
+        <div class="solution" data-bind="visible: SmallToBigSolution">
+            <table data-bind="with: SmallToBigSolution">
+                <thead>
+                    <tr><th># Steps</th><th>Water Pulled</th><th>Water Emptied</th></tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td data-bind="text: NumberOfActions, css: calculator.Css.s2b.Actions"></td>
+                        <!-- ko with: EndingReservoireState -->
+                        <td data-bind="text: VolumeUsed, css: calculator.Css.s2b.Used"></td>
+                        <td data-bind="text: VolumeThrownOut, css: calculator.Css.s2b.ThrownOut"></td>
+                        <!-- /ko -->
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <table border="1" class="actions">
+            <thead>
+                <tr><th class="stepno">Step #</th><th>Bucket A</th><th>Bucket B</th><th>Action Taken</th></tr>
+            </thead>
+            <tbody class="bound" data-bind="foreach: SmallToBig, visible: UseBoundActions">
+                <tr><td class="stepno" data-bind="text: StepNumber"></td>
+                    <td class="state" data-bind="text: $parent.State('A', $data).CurrentFill"></td>
+                    <td class="state" data-bind="text: $parent.State('B', $data).CurrentFill"></td>
+                    <td data-bind="text: Description"></td></tr>
+            </tbody>
+            <tbody class="unbound" data-bind="visible: !UseBoundActions()">
+            </tbody>
+        </table>
+    </div>
+</section>
+</section>
+
+</article>
+
+@section scripts
+{
+<script src="/signalr/hubs" type="text/javascript"></script>
+<script>
+    (function ($) {
+        // Code to use jQuery but before Document.Ready
+        var problemHub = $.connection.problemHub;
+        window.calculator = new wbc.CalculatorVM({ hub: problemHub });
+
+        problemHub.client.problemSubmitted = function (useObservable) {
+            calculator.Submitted();
+        };
+
+        problemHub.client.submission = function (problem, useWorker) {
+            calculator.FirstBucketCapacity(problem.FirstBucketCapacity);
+            calculator.SecondBucketCapacity(problem.SecondBucketCapacity);
+            calculator.GoalWaterVolume(problem.GoalWaterVolume);
+            calculator.InProcess(useWorker ? 'worker' : 'web');
+        };
+
+        problemHub.client.foundPublisherEP = function (pubAddr) {
+            calculator.AddMessage('Found Publisher EndPoint at: "' + pubAddr + '"');
+        };
+
+        problemHub.client.startedProblem = function (problem, bindActions) {
+            calculator.Started(bindActions);
+        };
+
+        problemHub.client.addMsg = function (message) {
+            calculator.AddMessage(message);
+        };
+
+        problemHub.client.notSolvable = function (problem) {
+            calculator.IsSolvable(false);
+        };
+
+        problemHub.client.outOfRange = function (val, tooBig) {
+            if (tooBig) {
+                calculator.AddMessage('The bucket capacity "' + val + '" is too large');
+            }
+            else {
+                calculator.AddMessage('The bucket capacity "' + val + '" is too small');
+            }
+        };
+
+        problemHub.client.actionStep = function (step) {
+            calculator.AddActionStep(step);
+        };
+
+        problemHub.client.errorInSolve = function (ex) {
+            calculator.AddMessage(ex.Message);
+        };
+
+        problemHub.client.problemCompleted = function (strategy) {
+            calculator.AddMessage('Completed execution of strategy "' + strategy + '" to solve the problem');
+        };
+
+        problemHub.client.problemSolution = function (strategy, result) {
+            calculator.AssignSolution(strategy, result);
+        };
+
+        $(function () {
+            // Code within Document.Ready
+            $.connection.hub.start().done(function () {
+                ko.validation.init({
+                    decorateElement: true,
+                    errorElementClass: 'input-validation-error',
+                    errorClass: 'field-validation-error'//,
+                    //parseInputAttributes: true
+                });
+
+                ko.applyBindings(calculator, $('#Calculator').get(0));
+                $('#Calculator').show();
+            });
+        });
+    })(jQuery);
+</script>
+}

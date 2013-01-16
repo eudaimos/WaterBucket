@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ServiceConfiguration serviceName="WaterBucket" xmlns="http://schemas.microsoft.com/ServiceHosting/2008/10/ServiceConfiguration" osFamily="3" osVersion="*" schemaVersion="2012-10.1.8">
+  <Role name="WaterBucketWeb">
+    <Instances count="1" />
+    <ConfigurationSettings>
+      <Setting name="Microsoft.WindowsAzure.Plugins.Diagnostics.ConnectionString" value="DefaultEndpointsProtocol=https;AccountName=waterbucket;AccountKey=wWopUFou9LhmtwhiNZXARs8oGUpT0d+6dJvF/TjkuxX7y5hTHbCAl8VWRLaaSCOg1ltiQwaJvB5wyhzD6PkK7g==" />
+      <Setting name="Bucket.Size.Max" value="5000" />
+      <Setting name="Bucket.Size.Min" value="2" />
+      <Setting name="StorageAccount" value="DefaultEndpointsProtocol=https;AccountName=waterbucket;AccountKey=wWopUFou9LhmtwhiNZXARs8oGUpT0d+6dJvF/TjkuxX7y5hTHbCAl8VWRLaaSCOg1ltiQwaJvB5wyhzD6PkK7g==" />
+      <Setting name="Microsoft.WindowsAzure.Plugins.RemoteAccess.Enabled" value="true" />
+      <Setting name="Microsoft.WindowsAzure.Plugins.RemoteAccess.AccountUsername" value="amused" />
+      <Setting name="Microsoft.WindowsAzure.Plugins.RemoteAccess.AccountEncryptedPassword" value="MIIBnQYJKoZIhvcNAQcDoIIBjjCCAYoCAQAxggFOMIIBSgIBADAyMB4xHDAaBgNVBAMME1dpbmRvd3MgQXp1cmUgVG9vbHMCEBbtQlpj5RKzTG50kASBiWgwDQYJKoZIhvcNAQEBBQAEggEABbwO994EgCt1WnvwhAkyqLjDAsmYX/kXJJ4UjF6rhpS1H+RAkCTEaqTAE/45IMgrhjcL34x7w/65CvfNEXKMfMV/iTuXiKlsrJYQmwqkFPJTzNLbdMrWxhXCQmuy1U5jXgUyVoQKeMrPUIBBgpNc0lee4m0MqTj6+CKuM7jkZKxHZXPcposTqfkumweuJmsISXHlF1uiMKhpWhd8wlULUBcbJaFSWo6ZpS6JjacTAx/8Gn5sT621DnVUmjSn2z9D8iTuJ0qnv6gvND/URXbNzbd39ZwNhxQmLtQHY+vhHyJGKYDt/CCJyvWpEvhtYT+/BJnebWSKx9ddaMlx0TmycjAzBgkqhkiG9w0BBwEwFAYIKoZIhvcNAwcECDWk3vCq/DjygBCRiZ2kRK1ufHzWwpWNAiPr" />
+      <Setting name="Microsoft.WindowsAzure.Plugins.RemoteAccess.AccountExpiration" value="2014-01-02T23:59:59.0000000-08:00" />
+      <Setting name="Action.Binding.Threshold" value="300" />
+      <Setting name="Action.On.Yield" value="false" />
+      <Setting name="Zmq.UseObservable" value="false" />
+      <Setting name="JavaScript.UseObservable" value="true" />
+      <Setting name="StagingStorageAccount" value="DefaultEndpointsProtocol=https;AccountName=waterbucketstg;AccountKey=keaGXNgY6z7jEI76jPSZ5u4w6KvwjipsbLIQoXGpwXB57vYqHPzAuXn6vS4XvOaXmoF9sGG/VLVesr3qITu4fA==" />
+      <Setting name="UseStaging" value="true" />
+      <Setting name="Client.BroadcastAll" value="false" />
+    </ConfigurationSettings>
+    <Certificates>
+      <Certificate name="Microsoft.WindowsAzure.Plugins.RemoteAccess.PasswordEncryption" thumbprint="481E71FBAA2AD2793DE1B4B235A18E30E3DA5766" thumbprintAlgorithm="sha1" />
+    </Certificates>
+  </Role>
+  <Role name="WaterBucketWorker">
+    <Instances count="2" />
+    <ConfigurationSettings>
+      <Setting name="Microsoft.WindowsAzure.Plugins.Diagnostics.ConnectionString" value="DefaultEndpointsProtocol=https;AccountName=waterbucket;AccountKey=wWopUFou9LhmtwhiNZXARs8oGUpT0d+6dJvF/TjkuxX7y5hTHbCAl8VWRLaaSCOg1ltiQwaJvB5wyhzD6PkK7g==" />
+      <Setting name="StorageAccount" value="DefaultEndpointsProtocol=https;AccountName=waterbucket;AccountKey=wWopUFou9LhmtwhiNZXARs8oGUpT0d+6dJvF/TjkuxX7y5hTHbCAl8VWRLaaSCOg1ltiQwaJvB5wyhzD6PkK7g==" />
+      <Setting name="Microsoft.WindowsAzure.Plugins.RemoteAccess.Enabled" value="true" />
+      <Setting name="Microsoft.WindowsAzure.Plugins.RemoteAccess.AccountUsername" value="amused" />
+      <Setting name="Microsoft.WindowsAzure.Plugins.RemoteAccess.AccountEncryptedPassword" value="MIIBnQYJKoZIhvcNAQcDoIIBjjCCAYoCAQAxggFOMIIBSgIBADAyMB4xHDAaBgNVBAMME1dpbmRvd3MgQXp1cmUgVG9vbHMCEBbtQlpj5RKzTG50kASBiWgwDQYJKoZIhvcNAQEBBQAEggEABbwO994EgCt1WnvwhAkyqLjDAsmYX/kXJJ4UjF6rhpS1H+RAkCTEaqTAE/45IMgrhjcL34x7w/65CvfNEXKMfMV/iTuXiKlsrJYQmwqkFPJTzNLbdMrWxhXCQmuy1U5jXgUyVoQKeMrPUIBBgpNc0lee4m0MqTj6+CKuM7jkZKxHZXPcposTqfkumweuJmsISXHlF1uiMKhpWhd8wlULUBcbJaFSWo6ZpS6JjacTAx/8Gn5sT621DnVUmjSn2z9D8iTuJ0qnv6gvND/URXbNzbd39ZwNhxQmLtQHY+vhHyJGKYDt/CCJyvWpEvhtYT+/BJnebWSKx9ddaMlx0TmycjAzBgkqhkiG9w0BBwEwFAYIKoZIhvcNAwcECDWk3vCq/DjygBCRiZ2kRK1ufHzWwpWNAiPr" />
+      <Setting name="Microsoft.WindowsAzure.Plugins.RemoteAccess.AccountExpiration" value="2014-01-02T23:59:59.0000000-08:00" />
+      <Setting name="Microsoft.WindowsAzure.Plugins.RemoteForwarder.Enabled" value="true" />
+      <Setting name="StagingStorageAccount" value="DefaultEndpointsProtocol=https;AccountName=waterbucketstg;AccountKey=keaGXNgY6z7jEI76jPSZ5u4w6KvwjipsbLIQoXGpwXB57vYqHPzAuXn6vS4XvOaXmoF9sGG/VLVesr3qITu4fA==" />
+      <Setting name="UseStaging" value="true" />
+      <Setting name="Forwarder.UseX" value="false" />
+      <Setting name="Work.Timeout" value="-1" />
+      <Setting name="Action.On.Yield" value="false" />
+    </ConfigurationSettings>
+    <Certificates>
+      <Certificate name="Microsoft.WindowsAzure.Plugins.RemoteAccess.PasswordEncryption" thumbprint="481E71FBAA2AD2793DE1B4B235A18E30E3DA5766" thumbprintAlgorithm="sha1" />
+    </Certificates>
+  </Role>
+</ServiceConfiguration>
