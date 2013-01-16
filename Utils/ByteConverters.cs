@@ -27,6 +27,7 @@ namespace Utils
         }
     }
 
+    // Taken from SO answer at the bottom: http://stackoverflow.com/questions/8827649/fastest-way-to-convert-int-to-4-bytes-in-c-sharp
     [StructLayout(LayoutKind.Explicit)]
     public struct ByteToInteger
     {
